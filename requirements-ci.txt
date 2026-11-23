@@ -1,0 +1,5 @@
+# Minimal dependencies for GitHub Actions CI
+# Full training/edge stack stays in requirements.txt
+pyyaml>=6.0.1
+pytest>=7.4.0
+pytest-cov>=4.1.0
