@@ -1,0 +1,81 @@
+# Triton Model Configuration for PPO-GAT Signal Control Agent
+name: "signal_rl"
+backend: "pytorch"
+max_batch_size: 1
+input [
+  {
+    name: "node_features"
+    data_type: TYPE_FP32
+    dims: [5, 19]      # 5 intersections x 19 features
+  },
+  {
+    name: "edge_index"
+    data_type: TYPE_INT64
+    dims: [2, 20]      # Graph connectivity
+  },
+  {
+    name: "edge_attr"
+    data_type: TYPE_FP32
+    dims: [20, 3]      # Edge attributes
+  }
+]
+output [
+  {
+    name: "actions"
+    data_type: TYPE_INT32
+    dims: [5]          # Phase extension per intersection [0, 5, 10, 15, 20]
+  },
+  {
+    name: "action_logits"
+    data_type: TYPE_FP32
+    dims: [5, 5]       # Logits per intersection per action
+  },
+  {
+    name: "value"
+    data_type: TYPE_FP32
+    dims: [1]          # State value estimate
+  }
+]
+instance_group [
+  {
+    count: 1
+    kind: KIND_GPU
+    gpus: [0]
+  }
+]
+dynamic_batching {
+  preferred_batch_size: [1]
+  max_queue_delay_microseconds: 5000
+}
+optimization {
+  priority: PRIORITY_HIGH
+}
+model_repository {
+  version_policy: "latest"
+}
+parameters [
+  {
+    key: "model_type"
+    value: { string_value: "ppo_gat" }
+  },
+  {
+    key: "num_intersections"
+    value: { string_value: "5" }
+  },
+  {
+    key: "num_phases"
+    value: { string_value: "[5, 4, 5, 4, 4]" }
+  },
+  {
+    key: "action_space"
+    value: { string_value: "[0, 5, 10, 15, 20]" }
+  },
+  {
+    key: "intersection_ids"
+    value: { string_value: "chaharbag_azadi,chaharbag_hezar_jerib,chaharbag_jomhuri,azadi_hezar_jerib,jomhuri_hezar_jerib" }
+  },
+  {
+    key: "phase_definitions"
+    value: { string_value: "configs/signal_phases.yaml" }
+  }
+]

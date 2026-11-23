@@ -1,0 +1,240 @@
+# ناهنجاری‌های ترافیکی بومی ایران/اصفهان
+# بر اساس آمار پلیس راهور و درمانگاه‌های تهران/اصفهان
+
+anomaly_classes:
+  - id: 0
+    name: "normal"
+    name_fa: "طبیعی"
+    description: "رفتار طبیعی رانندگی/پیاده‌روی"
+    severity: 0
+    enforcement_action: "none"
+    fine_toman: 0
+    points: 0
+
+  - id: 1
+    name: "motorcycle_wrong_lane"
+    name_fa: "موتور در خط اختصاصی"
+    description: "موتورسوار در خط автобوس، BRT، یا خط چپidelان"
+    severity: 3
+    enforcement_action: "camera_ticket"
+    fine_toman: 3_000_000
+    points: 2
+    common_locations: ["brt_lane", "leftmost_lane", "bus_only_lane"]
+    detection_hints:
+      - "vehicle_class == motorcycle"
+      - "lane_type in [brt, bus_only, leftmost]"
+      - "duration > 3_seconds"
+
+  - id: 2
+    name: "red_light_violation"
+    name_fa: "عبور از قرمز"
+    description: "عبور از تقاطع در فاز قرمز سیگنال"
+    severity: 10
+    enforcement_action: "camera_ticket + sms"
+    fine_toman: 6_000_000
+    points: 4
+    common_locations: ["all_approaches"]
+    detection_hints:
+      - "signal_phase == red"
+      - "vehicle_crosses_stop_line"
+      - "speed > 5_kmh"
+    grace_period_seconds: 2
+
+  - id: 3
+    name: "illegal_uturn"
+    name_fa: "دور زدن غیرمجاز"
+    description: "دور زدن در مکان ممنوعه یا بدون مجوز"
+    severity: 5
+    enforcement_action: "camera_ticket"
+    fine_toman: 3_000_000
+    points: 2
+    common_locations: ["median_crossover", "intersection_inside", "no_uturn_sign"]
+    detection_hints:
+      - "heading_change > 150_degrees"
+      - "in_prohibited_zone"
+      - "not_at_designated_uturn"
+
+  - id: 4
+    name: "stop_on_crosswalk"
+    name_fa: "توقف روی پیاده‌رو"
+    description: "پارک یا توقف خودرو روی خطوط پیاده‌رو"
+    severity: 4
+    enforcement_action: "camera_ticket"
+    fine_toman: 2_000_000
+    points: 1
+    common_locations: ["all_crosswalks"]
+    detection_hints:
+      - "vehicle_stopped"
+      - "overlaps_crosswalk_polygon"
+      - "duration > 5_seconds"
+
+  - id: 5
+    name: "wrong_way_driving"
+    name_fa: "رانندگی در خلاف جهت"
+    description: "حرکت در جهت مخالف ترافیک یک‌طرفه"
+    severity: 10
+    enforcement_action: "immediate_alert + police_dispatch"
+    fine_toman: 10_000_000
+    points: 6
+    common_locations: ["one_way_streets", "ramp_entry", "brt_lane_reverse"]
+    detection_hints:
+      - "heading_opposite_to_lane_direction"
+      - "speed > 10_kmh"
+      - "not_reversing_maneuver"
+
+  - id: 6
+    name: "pedestrian_jaywalking"
+    name_fa: "پیاده‌روی نامناسب"
+    description: "عبور پیاده‌رو از خارج از خطوط، در حالت قرمز، یا بین خودروها"
+    severity: 3
+    enforcement_action: "warning_broadcast"
+    fine_toman: 500_000
+    points: 0
+    common_locations: ["mid_block", "red_pedestrian_signal", "between_vehicles"]
+    detection_hints:
+      - "class == pedestrian"
+      - "outside_crosswalk_polygon"
+      - "or signal_phase == red_ped"
+
+  - id: 7
+    name: "bus_lane_violation"
+    name_fa: "خودرو در خط BRT/اتوبوس"
+    description: "خودرو سواری در خط اختصاصی اتوبوس/بی‌آرتی"
+    severity: 4
+    enforcement_action: "camera_ticket"
+    fine_toman: 4_000_000
+    points: 2
+    common_locations: ["brt_lane_chaharbag", "bus_only_lanes"]
+    detection_hints:
+      - "vehicle_class in [sedan, pickup, van, truck]"
+      - "lane_type == brt_or_bus_only"
+      - "not_authorized_vehicle"
+
+  - id: 8
+    name: "truck_in_car_lane"
+    name_fa: "کامیون در خط سواری"
+    description: "بارهای سنگین در خطوط اختصاصی سواری"
+    severity: 6
+    enforcement_action: "camera_ticket + weigh_station_redirect"
+    fine_toman: 8_000_000
+    points: 3
+    common_locations: ["chaharbag_main_lanes", "azadi_main_lanes"]
+    detection_hints:
+      - "vehicle_class in [truck_heavy, truck_medium]"
+      - "lane_type == car_only"
+      - "not_delivery_time_window"
+
+  - id: 9
+    name: "sudden_lane_change"
+    name_fa: "تغییر خط ناگهانی خطرناک"
+    description: "تغییر خط بدون سینگال، با سرعت بالا، یا در فاصله ناامن"
+    severity: 5
+    enforcement_action: "warning_log"
+    fine_toman: 3_000_000
+    points: 2
+    common_locations: ["approach_zones", "merge_areas"]
+    detection_hints:
+      - "lateral_acceleration > 3_m_s2"
+      - "no_turn_signal_detected"
+      - "time_to_collision < 2_seconds"
+
+  - id: 10
+    name: "speeding"
+    name_fa: "سرعت بیش از حد"
+    description: "سرعت بیشتر از مجاز در محدوده تقاطع"
+    severity: 7
+    enforcement_action: "camera_ticket"
+    fine_toman: 5_000_000
+    points: 3
+    common_locations: ["approach_zones", "exit_zones"]
+    speed_limits_kmh:
+      approach: 50
+      intersection: 30
+      exit: 60
+      school_zone: 30
+    detection_hints:
+      - "speed > limit + 10_tolerance"
+      - "in_enforcement_zone"
+
+# تنظیمات تشخیص
+detection_config:
+  # نواحی جغرافیایی برای هر ناهنجاری
+  zones:
+    brt_lane_chaharbag:
+      polygon: [[120.5, -45.2], [125.0, -40.0], [125.0, 40.0], [120.5, 45.2]]
+      lane_ids: [4]
+      direction: "northbound"
+    
+    brt_lane_chaharbag_south:
+      polygon: [[-110.3, 42.1], [-115.0, 48.0], [-115.0, -48.0], [-110.3, -42.1]]
+      lane_ids: [4]
+      direction: "southbound"
+    
+    crosswalk_north:
+      polygon: [[100.0, -15.0], [140.0, -15.0], [140.0, 15.0], [100.0, 15.0]]
+    
+    crosswalk_south:
+      polygon: [[-140.0, -15.0], [-100.0, -15.0], [-100.0, 15.0], [-140.0, 15.0]]
+    
+    crosswalk_east:
+      polygon: [[-15.0, 100.0], [15.0, 100.0], [15.0, 140.0], [-15.0, 140.0]]
+    
+    crosswalk_west:
+      polygon: [[-15.0, -140.0], [15.0, -140.0], [15.0, -100.0], [-15.0, -100.0]]
+    
+    stop_line_north:
+      line: [[100.0, -20.0], [100.0, 20.0]]
+    
+    stop_line_south:
+      line: [[-100.0, -20.0], [-100.0, 20.0]]
+    
+    stop_line_east:
+      line: [[-20.0, 100.0], [20.0, 100.0]]
+    
+    stop_line_west:
+      line: [[-20.0, -100.0], [20.0, -100.0]]
+
+  # آستانه‌های زمانی
+  temporal_thresholds:
+    min_violation_duration: 1.0  # ثانیه
+    max_gap_for_continuous: 3.0  # ثانیه
+    pedestrian_crossing_timeout: 30.0
+    vehicle_stop_timeout: 5.0
+
+  # فیلترهای 거짓‌آلارم
+  false_positive_filters:
+    - "emergency_vehicle_active"
+    - "authorized_construction_vehicle"
+    - "funeral_procession"
+    - "police_escort"
+    - "vehicle_reversing_into_parking"
+    - "shadow_occlusion"
+    - "reflection_on_wet_road"
+
+# اولویت‌بندی برای داشبورد و هشدار
+alert_priorities:
+  critical: [2, 5]  # red_light, wrong_way
+  high: [8, 10]     # truck_in_car_lane, speeding
+  medium: [3, 7, 9] # illegal_uturn, bus_lane, sudden_lane_change
+  low: [1, 4, 6]    # motorcycle_wrong_lane, stop_on_crosswalk, jaywalking
+
+# اکشن‌های خودکار
+automated_actions:
+  critical:
+    - "immediate_mqtt_alert"
+    - "save_evidence_clip_30s"
+    - "notify_traffic_police_api"
+    - "trigger_vms_warning"
+  
+  high:
+    - "mqtt_alert"
+    - "save_evidence_clip_15s"
+    - "add_to_daily_report"
+  
+  medium:
+    - "log_to_database"
+    - "save_snapshot"
+  
+  low:
+    - "aggregate_statistics"
+    - "hourly_summary"

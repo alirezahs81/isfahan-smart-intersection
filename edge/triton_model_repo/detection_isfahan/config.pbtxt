@@ -1,0 +1,68 @@
+# Triton Model Configuration for YOLOv10-ISF Detection
+name: "detection_isfahan"
+backend: "tensorrt"
+max_batch_size: 8
+input [
+  {
+    name: "input"
+    data_type: TYPE_FP16
+    dims: [3, 640, 640]
+  }
+]
+output [
+  {
+    name: "output0"
+    data_type: TYPE_FP16
+    dims: [300, 6]  # [x, y, w, h, conf, class] x 300 max detections
+  }
+]
+instance_group [
+  {
+    count: 1
+    kind: KIND_GPU
+    gpus: [0]
+  }
+]
+dynamic_batching {
+  preferred_batch_size: [4, 8]
+  max_queue_delay_microseconds: 1000
+}
+optimization {
+  priority: PRIORITY_MAX
+  cuda {
+    graphs: true
+  }
+  tensorrt {
+    precision_mode: "INT8"
+    calibration_mode: "ENTROPY_CALIBRATION_2"
+  }
+}
+model_repository {
+  version_policy: "latest"
+}
+parameters [
+  {
+    key: "model_type"
+    value: { string_value: "yolov10" }
+  },
+  {
+    key: "num_classes"
+    value: { string_value: "12" }
+  },
+  {
+    key: "reg_max"
+    value: { string_value: "16" }
+  },
+  {
+    key: "strides"
+    value: { string_value: "[8, 16, 32]" }
+  },
+  {
+    key: "conf_threshold"
+    value: { string_value: "0.25" }
+  },
+  {
+    key: "iou_threshold"
+    value: { string_value: "0.5" }
+  }
+]

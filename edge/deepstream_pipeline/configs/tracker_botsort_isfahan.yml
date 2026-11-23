@@ -1,0 +1,222 @@
+# BoT-SORT Tracker Configuration for Isfahan Traffic
+# NvDCF Tracker with ReID integration for multi-camera tracking
+
+tracker_config:
+  # Tracker type: 0=NvDCF, 1=KLT, 2=IOU
+  tracker_type: 0
+  
+  # NvDCF Configuration
+  nvdcfg:
+    # Target management
+    max_targets_per_stream: 300
+    max_shadow_tracking_age: 30
+    probation_age: 3
+    early_termination_age: 1
+    
+    # Data association
+    use_global_motion_compensation: 1  # Camera motion compensation
+    gmc_type: 1  # 0=none, 1=orb, 2=ec
+    gmc_downscale: 2
+    
+    # Appearance model (ReID)
+    use_appearance_model: 1
+    appearance_model_type: 1  # 0=none, 1=reid
+    reid_engine_path: "/app/weights/tracking/osnet_x1_0_isfahan.engine"
+    reid_input_dims: "3;256;128"  # CHW
+    reid_batch_size: 32
+    reid_feature_dim: 512
+    
+    # Appearance matching
+    appearance_similarity_threshold: 0.25
+    appearance_matching_weight: 0.7
+    motion_matching_weight: 0.3
+    
+    # Motion model
+    motion_model_type: 1  # 0=constant velocity, 1=constant acceleration
+    process_noise_scale: 1.0
+    measurement_noise_scale: 1.0
+    
+    # Data association thresholds
+    min_iou_threshold: 0.3
+    min_det_confidence: 0.2
+    track_confidence_threshold: 0.3
+    
+    # Shadow tracking
+    enable_shadow_tracking: 1
+    shadow_tracking_max_age: 60
+    
+    # Feature extraction
+    feature_extraction_interval: 1
+    feature_buffer_size: 30
+    feature_update_policy: "weighted_average"
+    feature_update_weight: 0.9
+    
+    # Visualization
+    display_tracking_id: 1
+    display_bounding_box: 1
+    display_class_name: 1
+    display_confidence: 1
+
+# BoT-SORT specific parameters
+botsort:
+  # Track management
+  track_high_thresh: 0.6      # High confidence detection -> new track
+  track_low_thresh: 0.1       # Low confidence detection -> associate with existing
+  new_track_thresh: 0.7       # New track creation threshold
+  track_buffer: 30            # Frame buffer for lost tracks
+  
+  # Matching
+  match_thresh: 0.8           # Association threshold
+  proximity_thresh: 0.5       # Spatial proximity threshold
+  appearance_thresh: 0.25     # Appearance similarity threshold
+  
+  # Camera Motion Compensation
+  cmc_method: "orb"           # ORB feature matching for CMC
+  cmc_scale: 2                # Downscale for CMC
+  
+  # Lambda weight (motion vs appearance)
+  lambda_weight: 0.98         # 0.98 = heavily favor motion
+  
+  # Frame rate
+  frame_rate: 25              # FPS for time-based calculations
+  
+  # Multi-camera
+  enable_mcmt: 1              # Multi-camera multi-target
+  mcmt_match_thresh: 0.75     # Cross-camera matching threshold
+
+# Class-specific tracking parameters
+class_configs:
+  # Vehicles - high persistence
+  - class_id: 0   # sedan_iran
+    track_high_thresh: 0.6
+    track_low_thresh: 0.15
+    track_buffer: 40
+    min_iou_threshold: 0.3
+  
+  - class_id: 1   # pickup_iran
+    track_high_thresh: 0.6
+    track_low_thresh: 0.15
+    track_buffer: 40
+    min_iou_threshold: 0.3
+  
+  - class_id: 2   # motorcycle_iran
+    track_high_thresh: 0.55
+    track_low_thresh: 0.1
+    track_buffer: 30
+    min_iou_threshold: 0.25
+  
+  - class_id: 3   # bus_brt
+    track_high_thresh: 0.65
+    track_low_thresh: 0.2
+    track_buffer: 50
+    min_iou_threshold: 0.4
+  
+  - class_id: 4   # bus_city
+    track_high_thresh: 0.65
+    track_low_thresh: 0.2
+    track_buffer: 50
+    min_iou_threshold: 0.4
+  
+  - class_id: 5   # truck_heavy
+    track_high_thresh: 0.6
+    track_low_thresh: 0.15
+    track_buffer: 40
+    min_iou_threshold: 0.35
+  
+  - class_id: 6   # van_transport
+    track_high_thresh: 0.6
+    track_low_thresh: 0.15
+    track_buffer: 40
+    min_iou_threshold: 0.3
+  
+  # Vulnerable road users - lower persistence, higher sensitivity
+  - class_id: 7   # bicycle
+    track_high_thresh: 0.5
+    track_low_thresh: 0.1
+    track_buffer: 20
+    min_iou_threshold: 0.2
+  
+  - class_id: 8   # pedestrian
+    track_high_thresh: 0.45
+    track_low_thresh: 0.08
+    track_buffer: 15
+    min_iou_threshold: 0.15
+  
+  # Infrastructure - static tracking
+  - class_id: 9   # traffic_light
+    track_high_thresh: 0.7
+    track_low_thresh: 0.3
+    track_buffer: 100
+    min_iou_threshold: 0.5
+  
+  - class_id: 10  # traffic_sign
+    track_high_thresh: 0.7
+    track_low_thresh: 0.3
+    track_buffer: 100
+    min_iou_threshold: 0.5
+  
+  - class_id: 11  # crosswalk
+    track_high_thresh: 0.8
+    track_low_thresh: 0.5
+    track_buffer: 200
+    min_iou_threshold: 0.6
+
+# Zone-based tracking
+zones:
+  - name: "north_approach"
+    polygon: [[100, -20], [140, -20], [140, 20], [100, 20]]
+    track_buffer_multiplier: 1.5
+    min_confidence: 0.3
+  
+  - name: "south_approach"
+    polygon: [[-140, -20], [-100, -20], [-100, 20], [-140, 20]]
+    track_buffer_multiplier: 1.5
+    min_confidence: 0.3
+  
+  - name: "east_approach"
+    polygon: [[-20, 100], [20, 100], [20, 140], [-20, 140]]
+    track_buffer_multiplier: 1.3
+    min_confidence: 0.25
+  
+  - name: "west_approach"
+    polygon: [[-20, -140], [20, -140], [20, -100], [-20, -100]]
+    track_buffer_multiplier: 1.3
+    min_confidence: 0.25
+  
+  - name: "intersection_center"
+    polygon: [[-15, -15], [15, -15], [15, 15], [-15, 15]]
+    track_buffer_multiplier: 1.0
+    min_confidence: 0.4
+  
+  - name: "brt_lane_north"
+    polygon: [[120, -20], [125, -20], [125, 20], [120, 20]]
+    track_buffer_multiplier: 1.2
+    min_confidence: 0.3
+    allowed_classes: [3]  # bus_brt only
+  
+  - name: "brt_lane_south"
+    polygon: [[-125, -20], [-120, -20], [-120, 20], [-125, 20]]
+    track_buffer_multiplier: 1.2
+    min_confidence: 0.3
+    allowed_classes: [3]  # bus_brt only
+
+# Output configuration
+output:
+  # Metadata
+  enable_past_frame: 1
+  past_frame_max_size: 10
+  
+  # Tracking data
+  output_tracking_id: 1
+  output_bbox: 1
+  output_confidence: 1
+  output_class_id: 1
+  output_roi: 0
+  output_zone: 1
+  output_velocity: 1
+  output_reid_features: 1
+  
+  # Format
+  format: "json"
+  include_timestamp: 1
+  include_frame_number: 1

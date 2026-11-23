@@ -1,0 +1,123 @@
+intersection:
+  id: "chaharbag_azadi"
+  name_fa: "چهارباغ-آزادی"
+  name_en: "ChaharBagh-Azadi"
+  city: "Isfahan"
+  coordinates: [32.6546, 51.6680]
+  timezone: "Asia/Tehran"
+  
+  geometry:
+    approach_north: "ChaharBagh_N"
+    approach_south: "ChaharBagh_S"
+    approach_east: "Azadi_E"
+    approach_west: "Azadi_W"
+    lanes_per_approach: 4
+    has_brt_lane: true
+    brt_lane_position: "rightmost"
+    pedestrian_crossings: 4
+    crosswalk_width: 4.5
+  
+  signal_controller:
+    type: "UTC_Siemens_Sitrafic"
+    ip: "10.100.50.15"
+    protocol: "NTCIP_1202"
+    phases: 5
+    phase_definitions: "configs/signal_phases.yaml"
+    min_green: 8
+    max_green: 90
+    yellow_time: 3.5
+    all_red_time: 2.0
+    pedestrian_time: 15
+  
+  cameras:
+    - id: "cam_01"
+      name_fa: "شمال چهارباغ - رو به جنوب"
+      rtsp: "rtsp://admin:pass@10.100.50.21:554/stream1"
+      position: "north_approach"
+      fov: 90
+      resolution: [1920, 1080]
+      fps: 25
+      calibration: "configs/calibration/cam_01.yaml"
+    - id: "cam_02"
+      name_fa: "جنوب چهارباغ - رو به شمال"
+      rtsp: "rtsp://admin:pass@10.100.50.22:554/stream1"
+      position: "south_approach"
+      fov: 90
+      resolution: [1920, 1080]
+      fps: 25
+      calibration: "configs/calibration/cam_02.yaml"
+    - id: "cam_03"
+      name_fa: "شرق آزادی - رو به غرب"
+      rtsp: "rtsp://admin:pass@10.100.50.23:554/stream1"
+      position: "east_approach"
+      fov: 90
+      resolution: [1920, 1080]
+      fps: 25
+      calibration: "configs/calibration/cam_03.yaml"
+    - id: "cam_04"
+      name_fa: "غرب آزادی - رو به شرق"
+      rtsp: "rtsp://admin:pass@10.100.50.24:554/stream1"
+      position: "west_approach"
+      fov: 90
+      resolution: [1920, 1080]
+      fps: 25
+      calibration: "configs/calibration/cam_04.yaml"
+    - id: "cam_05"
+      name_fa: "نمای غoghi شمال شرقی"
+      rtsp: "rtsp://admin:pass@10.100.50.25:554/stream1"
+      position: "ne_corner_overview"
+      fov: 120
+      resolution: [1920, 1080]
+      fps: 25
+      calibration: "configs/calibration/cam_05.yaml"
+    - id: "cam_06"
+      name_fa: "نمای غoghi شمال غربی"
+      rtsp: "rtsp://admin:pass@10.100.50.26:554/stream1"
+      position: "nw_corner_overview"
+      fov: 120
+      resolution: [1920, 1080]
+      fps: 25
+      calibration: "configs/calibration/cam_06.yaml"
+    - id: "cam_07"
+      name_fa: "نمای غoghi جنوب شرقی"
+      rtsp: "rtsp://admin:pass@10.100.50.27:554/stream1"
+      position: "se_corner_overview"
+      fov: 120
+      resolution: [1920, 1080]
+      fps: 25
+      calibration: "configs/calibration/cam_07.yaml"
+    - id: "cam_08"
+      name_fa: "نمای غoghi جنوب غربی"
+      rtsp: "rtsp://admin:pass@10.100.50.28:554/stream1"
+      position: "sw_corner_overview"
+      fov: 120
+      resolution: [1920, 1080]
+      fps: 25
+      calibration: "configs/calibration/cam_08.yaml"
+  
+  traffic_patterns:
+    morning_peak: "07:00-09:30"
+    evening_peak: "16:00-19:30"
+    friday_pattern: "reduced_20_percent"
+    ramadan_pattern: "shifted_evening_peak"
+    special_events: ["nowruz", "moharram", "safar"]
+  
+  anomaly_priorities:
+    red_light_violation: 10
+    wrong_way_driving: 10
+    truck_in_car_lane: 8
+    speeding: 7
+    sudden_lane_change: 6
+    bus_lane_violation: 5
+    illegal_uturn: 5
+    stop_on_crosswalk: 4
+    motorcycle_wrong_lane: 3
+    pedestrian_jaywalking: 3
+  
+  integration:
+    utc_system: "isfahan_utc_v3"
+    scada_system: "isfahan_scada_traffic"
+    cms_api: "https://cms.isfahan.municipality.ir/api/v1"
+    alert_webhook: "https://alerts.isfahan.municipality.ir/webhook"
+    mqtt_broker: "isfahan-utc.municipality.ir:8883"
+    mqtt_topic_prefix: "isfahan/traffic/chaharbag_azadi"

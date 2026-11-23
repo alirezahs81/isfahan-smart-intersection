@@ -1,0 +1,92 @@
+# Triton Model Configuration for ST-GCN Anomaly Detection
+name: "anomaly_stgcn"
+backend: "onnxruntime"
+max_batch_size: 16
+input [
+  {
+    name: "trajectory"
+    data_type: TYPE_FP32
+    dims: [6, 50, 50]  # [C=6 features, T=50 timesteps, N=50 nodes]
+  },
+  {
+    name: "edge_index"
+    data_type: TYPE_INT64
+    dims: [2, 200]     # Graph connectivity (sparse)
+  },
+  {
+    name: "edge_weight"
+    data_type: TYPE_FP32
+    dims: [200]        # Edge weights
+  },
+  {
+    name: "mask"
+    data_type: TYPE_BOOL
+    dims: [50, 50]     # Valid nodes mask [T, N]
+  }
+]
+output [
+  {
+    name: "anomaly_logits"
+    data_type: TYPE_FP32
+    dims: [11]         # 11 anomaly classes
+  },
+  {
+    name: "uncertainty"
+    data_type: TYPE_FP32
+    dims: [1]          # Uncertainty estimate
+  }
+]
+instance_group [
+  {
+    count: 1
+    kind: KIND_GPU
+    gpus: [0]
+  }
+]
+dynamic_batching {
+  preferred_batch_size: [8, 16]
+  max_queue_delay_microseconds: 2000
+}
+optimization {
+  priority: PRIORITY_HIGH
+  execution_accelerators {
+    gpu_execution_accelerator: [
+      {
+        name: "tensorrt"
+        parameters: {
+          key: "precision_mode"
+          value: "FP16"
+        }
+      }
+    ]
+  }
+}
+model_repository {
+  version_policy: "latest"
+}
+parameters [
+  {
+    key: "model_type"
+    value: { string_value: "st_gcn" }
+  },
+  {
+    key: "num_classes"
+    value: { string_value: "11" }
+  },
+  {
+    key: "anomaly_classes"
+    value: { string_value: "normal,motorcycle_wrong_lane,red_light_violation,illegal_uturn,stop_on_crosswalk,wrong_way_driving,pedestrian_jaywalking,bus_lane_violation,truck_in_car_lane,sudden_lane_change,speeding" }
+  },
+  {
+    key: "severity_weights"
+    value: { string_value: "0,3,10,5,4,10,3,4,6,5,7" }
+  },
+  {
+    key: "confidence_threshold"
+    value: { string_value: "0.7" }
+  },
+  {
+    key: "uncertainty_threshold"
+    value: { string_value: "0.9" }
+  }
+]

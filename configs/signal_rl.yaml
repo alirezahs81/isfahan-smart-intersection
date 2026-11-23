@@ -1,0 +1,78 @@
+# PPO-GAT Signal Control Training Configuration for Isfahan
+
+# Environment
+sumo_cfg: "configs/sumo/isfahan_network.sumocfg"
+max_steps: 3600           # 1 hour episodes
+action_interval: 10       # Decision every 10 seconds
+gui: false
+
+# Network
+n_envs: 8                 # Parallel environments
+total_timesteps: 1000000  # 1M timesteps
+
+# PPO Hyperparameters
+learning_rate: 3e-4
+n_steps: 2048
+batch_size: 256
+n_epochs: 10
+gamma: 0.99
+gae_lambda: 0.95
+clip_range: 0.2
+ent_coef: 0.01
+vf_coef: 0.5
+max_grad_norm: 0.5
+
+# GAT Architecture
+gat_hidden_dim: 256
+gat_heads: 4
+gat_layers: 3
+gat_dropout: 0.1
+
+# Policy Network
+net_arch_pi: [256, 128]
+net_arch_vf: [256, 128]
+activation_fn: "relu"
+
+# Training
+seed: 42
+device: "cuda"
+tensorboard_log: "./logs/ppo_gat/"
+model_save_path: "models/signal_rl/weights/ppo_gat_isfahan"
+
+# Curriculum Learning
+curriculum:
+  enabled: true
+  stages:
+    - name: "single_intersection"
+      timesteps: 200000
+      intersections: 1
+      traffic_density: 0.5
+    - name: "corridor_3"
+      timesteps: 300000
+      intersections: 3
+      traffic_density: 0.7
+    - name: "full_network_5"
+      timesteps: 500000
+      intersections: 5
+      traffic_density: 1.0
+
+# Reward Weights (Isfahan-specific)
+reward_weights:
+  pressure: -1.0
+  wait_time: -0.5
+  throughput: 0.3
+  pedestrian_wait: -0.8
+  emergency_priority: 5.0
+  phase_switch: -0.1
+  spillback: -2.0
+  equity: -0.3
+  coordination: 0.5
+
+# Evaluation
+eval_freq: 50000
+eval_episodes: 10
+eval_deterministic: true
+
+# Checkpointing
+save_freq: 100000
+save_best: true

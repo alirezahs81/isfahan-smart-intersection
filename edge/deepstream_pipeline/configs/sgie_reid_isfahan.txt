@@ -1,0 +1,44 @@
+# SGIE Configuration for ReID (OSNet-x1.0) - Tracking Association
+# Secondary GIE - operates on tracked objects from PGIE
+
+[property]
+gpu-id=0
+net-scale-factor=0.0039215697906911373
+model-color-format=0
+tensor-prepared=1
+maintain-aspect-ratio=1
+batch-size=32
+network-mode=2
+num-detected-classes=1
+interval=0
+gie-unique-id=2
+is-classifier=0
+output-blob-names=output
+custom-lib-path=/opt/nvidia/deepstream/deepstream/lib/libnvds_infercustomparser.so
+onnx-file=/app/weights/tracking/osnet_x1_0_isfahan.onnx
+engine-file=/app/weights/tracking/osnet_x1_0_isfahan.engine
+input-dims=3;256;128
+output-tensor-meta=1
+generate-output-tensor-meta=1
+process-mode=2  # Operate on objects from PGIE (gie-id=1)
+operate-on-gie-id=1
+operate-on-class-ids=0;1;2;3;4;5;6;7;8  # All vehicle/pedestrian classes
+
+# Triton Inference
+triton-model-name=tracking_reid
+triton-model-version=-1
+triton-url=localhost:8001
+triton-grpc-use-ssl=0
+triton-input-names=input
+triton-output-names=output
+
+# Preprocessing (ImageNet normalization)
+mean-values=123.675;116.28;103.53
+std-values=58.395;57.12;57.375
+
+[class-attrs-all]
+threshold=0.0
+roi-top=0
+roi-left=0
+roi-bottom=0
+roi-right=0

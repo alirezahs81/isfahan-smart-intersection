@@ -1,0 +1,56 @@
+# SGIE Configuration for ST-GCN Anomaly Detection
+# Secondary GIE - operates on tracked objects for trajectory-based anomaly classification
+
+[property]
+gpu-id=0
+net-scale-factor=1.0
+model-color-format=0
+tensor-prepared=1
+maintain-aspect-ratio=0
+batch-size=16
+network-mode=2
+num-detected-classes=11
+interval=5  # Run every 5 frames (5 FPS for anomaly detection)
+gie-unique-id=3
+is-classifier=1
+output-blob-names=output
+onnx-file=/app/weights/anomaly/stgcn_isfahan.onnx
+engine-file=/app/weights/anomaly/stgcn_isfahan.engine
+input-dims=6;50;50  # C=6 features, T=50 timesteps, N=50 nodes
+output-tensor-meta=1
+generate-output-tensor-meta=1
+process-mode=2  # Operate on objects from PGIE
+operate-on-gie-id=1
+operate-on-class-ids=0;1;2;3;4;5;6;7;8  # Vehicle and pedestrian classes
+
+# Triton Inference
+triton-model-name=anomaly_stgcn
+triton-model-version=-1
+triton-url=localhost:8001
+triton-grpc-use-ssl=0
+triton-input-names=trajectory
+triton-output-names=anomaly_logits,uncertainty
+
+# Preprocessing (trajectory features normalized)
+mean-values=0.0;0.0;0.0;0.0;0.0;0.0
+std-values=1.0;1.0;1.0;1.0;1.0;1.0
+
+[class-attrs-all]
+threshold=0.0
+roi-top=0
+roi-left=0
+roi-bottom=0
+roi-right=0
+
+# Anomaly class labels (for reference)
+# 0: normal
+# 1: motorcycle_wrong_lane
+# 2: red_light_violation
+# 3: illegal_uturn
+# 4: stop_on_crosswalk
+# 5: wrong_way_driving
+# 6: pedestrian_jaywalking
+# 7: bus_lane_violation
+# 8: truck_in_car_lane
+# 9: sudden_lane_change
+# 10: speeding

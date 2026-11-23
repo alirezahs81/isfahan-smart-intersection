@@ -1,0 +1,83 @@
+# ============================================================
+# Isfahan Smart Intersection - .gitignore
+# ============================================================
+
+# Secrets / environment
+.env
+.env.*
+!.env.example
+
+# TLS certificates
+certs/
+*.crt
+*.key
+*.pem
+*.p12
+
+# Model weights & TensorRT engines (large binaries)
+models/**/weights/
+*.engine
+*.onnx
+*.pt
+*.pth
+*.ckpt
+*.trt
+*.plan
+*.cache
+
+# Training data & datasets
+data/
+datasets/
+*.mp4
+*.avi
+*.mkv
+*.h264
+*.h265
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+ENV/
+env/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# TensorBoard / training logs
+runs/
+logs/
+lightning_logs/
+wandb/
+mlruns/
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Docker
+*.pid
+docker-compose.override.yml
+
+# Nsight / profiler output
+*.qdrep
+*.qdstrm
+*.nsys-rep

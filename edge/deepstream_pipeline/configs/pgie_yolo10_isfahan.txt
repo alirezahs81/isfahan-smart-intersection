@@ -1,0 +1,49 @@
+# PGIE Configuration for YOLOv10-ISF Detection
+# Primary GIE - TensorRT Engine via Triton
+
+[property]
+gpu-id=0
+net-scale-factor=0.0039215697906911373  # 1/255
+model-color-format=0  # RGB
+tensor-prepared=1
+maintain-aspect-ratio=1
+batch-size=8
+network-mode=2  # FP16/INT8
+num-detected-classes=12
+interval=0
+gie-unique-id=1
+is-classifier=0
+output-blob-names=output0
+parse-bbox-func-name=NvDsInferParseYolo
+custom-lib-path=/opt/nvidia/deepstream/deepstream/lib/libnvds_infercustomparser.so
+onnx-file=/app/weights/detection/yolov10n_isfahan.onnx
+engine-file=/app/weights/detection/yolov10n_isfahan_int8.engine
+labelfile-path=/app/pipeline/configs/labels_isfahan.txt
+input-dims=3;640;640  # CHW
+cluster-mode=3  # DBSCAN clustering for NMS-free YOLOv10
+output-tensor-meta=1
+generate-output-tensor-meta=1
+
+# Triton Inference
+triton-model-name=detection_isfahan
+triton-model-version=-1
+triton-url=localhost:8001
+triton-grpc-use-ssl=0
+triton-input-names=input
+triton-output-names=output0
+triton-batch-size=8
+
+# Preprocessing
+mean-values=0;0;0
+std-values=255.0;255.0;255.0
+
+# NMS (handled by YOLOv10 internally)
+nms-iou-threshold=0.5
+pre-cluster-threshold=0.25
+
+[class-attrs-all]
+threshold=0.25
+roi-top=0
+roi-left=0
+roi-bottom=0
+roi-right=0

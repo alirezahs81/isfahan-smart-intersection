@@ -1,0 +1,12 @@
+sedan_iran
+pickup_iran
+motorcycle_iran
+bus_brt
+bus_city
+truck_heavy
+van_transport
+bicycle
+pedestrian
+traffic_light
+traffic_sign
+crosswalk

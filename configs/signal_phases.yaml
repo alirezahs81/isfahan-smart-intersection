@@ -1,0 +1,120 @@
+# فازهای سیگنال تقاطع چهارباغ-آزادی (استاندارد شهرداری اصفهان)
+# بر اساس پروتکل NTCIP 1202 و کنترلر Siemens Sitrafic
+
+phases:
+  - id: 0
+    name: "NB_SB_Straight"
+    name_fa: "شمال-جنوب مستقیم"
+    movements:
+      - from: "north"
+        to: "south"
+        type: "through"
+        lanes: [1, 2, 3]  # خط ۴ مخصوص BRT
+      - from: "south"
+        to: "north"
+        type: "through"
+        lanes: [1, 2, 3]
+    min_green: 20
+    max_green: 80
+    yellow: 3.5
+    all_red: 2.0
+    priority: "main_artery"
+    pedestrian_crossing: false
+
+  - id: 1
+    name: "NB_SB_Left"
+    name_fa: "شمال-جنوب چپ‌دوران"
+    movements:
+      - from: "north"
+        to: "west"
+        type: "left"
+        lanes: [4]
+      - from: "south"
+        to: "east"
+        type: "left"
+        lanes: [4]
+    min_green: 8
+    max_green: 25
+    yellow: 3.0
+    all_red: 2.0
+    priority: "main_artery"
+    pedestrian_crossing: false
+
+  - id: 2
+    name: "EB_WB_Straight"
+    name_fa: "شرق-غرب مستقیم"
+    movements:
+      - from: "east"
+        to: "west"
+        type: "through"
+        lanes: [1, 2]
+      - from: "west"
+        to: "east"
+        type: "through"
+        lanes: [1, 2]
+    min_green: 15
+    max_green: 60
+    yellow: 3.5
+    all_red: 2.0
+    priority: "secondary"
+    pedestrian_crossing: false
+
+  - id: 3
+    name: "EB_WB_Left"
+    name_fa: "شرق-غرب چپ‌دوران"
+    movements:
+      - from: "east"
+        to: "north"
+        type: "left"
+        lanes: [3]
+      - from: "west"
+        to: "south"
+        type: "left"
+        lanes: [3]
+    min_green: 8
+    max_green: 20
+    yellow: 3.0
+    all_red: 2.0
+    priority: "secondary"
+    pedestrian_crossing: false
+
+  - id: 4
+    name: "Pedestrian_All"
+    name_fa: "همه پیاده‌روها"
+    movements:
+      - from: "north_sidewalk"
+        to: "south_sidewalk"
+        type: "pedestrian"
+      - from: "south_sidewalk"
+        to: "north_sidewalk"
+        type: "pedestrian"
+      - from: "east_sidewalk"
+        to: "west_sidewalk"
+        type: "pedestrian"
+      - from: "west_sidewalk"
+        to: "east_sidewalk"
+        type: "pedestrian"
+    min_green: 15
+    max_green: 30
+    yellow: 0
+    all_red: 3.0
+    priority: "pedestrian"
+    pedestrian_crossing: true
+
+# تنظیمات تطبیقی (Adaptive) برای RL Agent
+adaptive_config:
+  cycle_time_min: 60
+  cycle_time_max: 180
+  extension_step: 5  # ثانیه
+  max_extension_per_cycle: 30
+  min_green_enforced: true
+  pedestrian_recall: true
+  emergency_preempt: true
+
+# اولویت‌بندی جهت‌ها (برای تابع پاداش RL)
+direction_priorities:
+  north: 1.0    # چهارباغ شمالی - شریان اصلی
+  south: 1.0    # چهارباغ جنوبی - شریان اصلی
+  east: 0.7     # آزادی شرقی - فرعی
+  west: 0.7     # آزادی غربی - فرعی
+  pedestrian: 1.2  # اولویت بالاتر برای پیاده‌رو

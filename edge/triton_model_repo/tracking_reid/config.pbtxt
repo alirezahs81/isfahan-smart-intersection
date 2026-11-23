@@ -1,0 +1,59 @@
+# Triton Model Configuration for OSNet-x1.0 ReID (Tracking Association)
+name: "tracking_reid"
+backend: "tensorrt"
+max_batch_size: 32
+input [
+  {
+    name: "input"
+    data_type: TYPE_FP16
+    dims: [3, 256, 128]
+  }
+]
+output [
+  {
+    name: "output"
+    data_type: TYPE_FP16
+    dims: [512]  # 512-dim embedding
+  }
+]
+instance_group [
+  {
+    count: 1
+    kind: KIND_GPU
+    gpus: [0]
+  }
+]
+dynamic_batching {
+  preferred_batch_size: [16, 32]
+  max_queue_delay_microseconds: 500
+}
+optimization {
+  priority: PRIORITY_MAX
+  cuda {
+    graphs: true
+  }
+  tensorrt {
+    precision_mode: "FP16"
+  }
+}
+model_repository {
+  version_policy: "latest"
+}
+parameters [
+  {
+    key: "model_type"
+    value: { string_value: "osnet_x1_0" }
+  },
+  {
+    key: "embedding_dim"
+    value: { string_value: "512" }
+  },
+  {
+    key: "input_resolution"
+    value: { string_value: "256x128" }
+  },
+  {
+    key: "normalize_embedding"
+    value: { string_value: "true" }
+  }
+]
